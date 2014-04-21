@@ -85,7 +85,16 @@ function geoFindMe() {
   function success(position) {
     bathroomCodeLiberator.latitude  = position.coords.latitude;
     bathroomCodeLiberator.longitude = position.coords.longitude;
-  	console.log(bathroomCodeLiberator.latitude);
+  	
+    var img = new Image();
+    img.src = "http://maps.googleapis.com/maps/api/staticmap?center=" + bathroomCodeLiberator.latitude + "," + bathroomCodeLiberator.longitude + "&zoom=18&size=300x300&sensor=false";
+
+
+    $('#suggestedLocation').append(bathroomCodeLiberator.latitude);
+    $('#suggestedLocation').append(bathroomCodeLiberator.longitude);
+    $('#suggestedLocation').append(img);
+
+    console.log(bathroomCodeLiberator.latitude);
   	console.log(bathroomCodeLiberator.longitude);
   	
   	foursquareURL += 'https://api.foursquare.com/v2/venues/search?';
