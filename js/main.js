@@ -90,7 +90,7 @@ function geoFindMe() {
     img.src = "http://maps.googleapis.com/maps/api/staticmap?center=" + bathroomCodeLiberator.latitude + "," + bathroomCodeLiberator.longitude + "&zoom=18&size=300x300&sensor=false";
 
 
-    $('#suggestedLocation').append(bathroomCodeLiberator.latitude);
+    $('#suggestedLocation').append(bathroomCodeLiberator.latitude + ',');
     $('#suggestedLocation').append(bathroomCodeLiberator.longitude);
     $('#suggestedLocation').append(img);
 
