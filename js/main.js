@@ -40,7 +40,7 @@ function getFourSquareVenues() {
 
 		success: function(data){
 			//console.log("got it");
-			//console.log(data);
+			console.log(data);
       suggestNearbyLocations(data);
 		},  
 		error: function(err){
@@ -51,8 +51,9 @@ function getFourSquareVenues() {
 
 function suggestNearbyLocations (data) {    
  console.log(data);
+ $('#suggestedLocation').empty();
  var possibleLocations = [];
- var closestLocations = []
+ var closestLocations = [];
  
  for (var i = 0; i < data.response.venues.length; i++) {
      possibleLocations.push(_.pick(data.response.venues[i], 'id', 'location', 'name'));
@@ -66,9 +67,6 @@ function suggestNearbyLocations (data) {
     return 0;
 });
 
- // for (var i = 0; i < possibleLocations.length; i++) {
- //  closestLocations.push(_.pick(possibleLocations[i].location.distance
- // }
  $('#suggestedLocation').append('<p>Are you at ' + possibleLocations[0].name + '?<p>'); 
  console.log(possibleLocations);
  // console.log(closestLocations);
@@ -77,6 +75,8 @@ function suggestNearbyLocations (data) {
 
 
 function geoFindMe() {
+  
+  $('#loadingDiv').removeAttr("hidden");
   if (!navigator.geolocation){
     output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
     return;
@@ -86,28 +86,24 @@ function geoFindMe() {
     bathroomCodeLiberator.latitude  = position.coords.latitude;
     bathroomCodeLiberator.longitude = position.coords.longitude;
   	
-    var img = new Image();
-    img.src = "http://maps.googleapis.com/maps/api/staticmap?center=" + bathroomCodeLiberator.latitude + "," + bathroomCodeLiberator.longitude + "&zoom=18&size=300x300&sensor=false";
+    // var img = new Image();
+    // img.src = "http://maps.googleapis.com/maps/api/staticmap?center=" + bathroomCodeLiberator.latitude + "," + bathroomCodeLiberator.longitude + "&zoom=18&size=300x300&sensor=false";
 
 
     $('#suggestedLocation').append(bathroomCodeLiberator.latitude + ',');
     $('#suggestedLocation').append(bathroomCodeLiberator.longitude);
-    $('#suggestedLocation').append(img);
+    // $('#suggestedLocation').append(img);
 
     console.log(bathroomCodeLiberator.latitude);
   	console.log(bathroomCodeLiberator.longitude);
   	
-  	foursquareURL += 'https://api.foursquare.com/v2/venues/search?';
-  	foursquareURL += 'client_id=' + CLIENT_ID;
-  	foursquareURL += '&client_secret=' + CLIENT_SECRET;
-  	foursquareURL += '&ll=' + bathroomCodeLiberator.latitude + ',' + bathroomCodeLiberator.longitude;
-  	foursquareURL += '&radius=20';
-  	foursquareURL += '&intent=checkin';
-  	foursquareURL += '&limit=20';
-  	foursquareURL += '&v=20140101';
+    //add some sort of templating to make sure we have to wait for the load
+    console.log("Latitude and longitude found.");
+    console.log("Enabling the text field.");
+    $('#loadingDiv').hide();
+    $('input').removeAttr("disabled");
+    
 
-  	console.log(foursquareURL);
-  	getFourSquareVenues();
   }
   
   function error() {
@@ -118,7 +114,19 @@ function geoFindMe() {
 }
 
 
+function foursquareURLinit(){
+    foursquareURL = '';
+    foursquareURL += 'https://api.foursquare.com/v2/venues/search?';
+    // foursquareURL += 'https://api.foursquare.com/v2/venues/suggestcompletion?';
+    foursquareURL += 'client_id=' + CLIENT_ID;
+    foursquareURL += '&client_secret=' + CLIENT_SECRET;
+    foursquareURL += '&ll=' + bathroomCodeLiberator.latitude + ',' + bathroomCodeLiberator.longitude;
+    foursquareURL += '&radius=100';
+    foursquareURL += '&intent=checkin';
+    foursquareURL += '&limit=20';
+    foursquareURL += '&v=20140101';
 
+}
 
 
 
@@ -132,6 +140,18 @@ $(function(){
 	getMyDate();
 	geoFindMe();
 
+
+$('#getLocationButton').click(function(){
+  console.log($('input').val());
+  var query = $('input').val();
+
+  foursquareURLinit();
+  foursquareURL += '&query='+ query; 
+  
+  console.log(foursquareURL);
+  getFourSquareVenues();
+});
+
 $('#getCodeButton').click(function(){
 	console.log("button clicked");
 	// getBathroomCode();
@@ -143,6 +163,7 @@ $('#submitCodeButton').click(function(){
 });
 
 });
+
 
 
 
