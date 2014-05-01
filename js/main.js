@@ -34,10 +34,7 @@ var CLOUDANT_DATABASE="bathroomcodes";
 var CLOUDANT_KEY="lismitspecincestandeastr";
 var CLOUDANT_PASSWORD="1qJD17wuNs0QOSNkfnJa1Iun";
 
-// This function takes your Cloudant key and password and returns a Base64
-// encoded string to authorize your requets. Without this, you'd need to fill
-// in a username and password to make requets. Read more about the btoa()
-// function here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding
+
 var hash = btoa(CLOUDANT_KEY+":"+CLOUDANT_PASSWORD);
 
 
@@ -53,7 +50,7 @@ var saveRecord = function (data) {
 };
 
 var loadCode = function () {
-  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+"/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + "&foursquare_venue_id:" + bathroomCodeLiberator.location.id, {
+  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+"/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + "&foursquare_venue_id:" + bathroomCodeLiberator.location.id + '&sort="date"', {
     beforeSend: function (xhr) {
       xhr.setRequestHeader ("Authorization", "Basic "+hash);
     },
@@ -63,11 +60,11 @@ var loadCode = function () {
     bathroomCodeLiberator.documents = JSON.parse(resp);
     console.log(bathroomCodeLiberator.documents);
     
-    console.log("The possible codes for today are: " );
-    
-    for (var i = 0; i < bathroomCodeLiberator.documents.rows.length; i++) {
-      console.log(bathroomCodeLiberator.documents.rows[i].doc.code);
-    }
+    $('#suggestedCode').append('<p>The most recent code is: ' + bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code + '<p>');
+
+    console.log("The most recent code is: " );
+    console.log(bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code);
+
     // // Now that the notes are sorted, render them using underscore templates
     // sorted.forEach(function (row) {
     //   var compiledTmpl = noteTemplate(row.doc);
@@ -215,7 +212,8 @@ $('#submitCodeButton').click(function(){
 
   var bathroomCodeData = {
     day: moment().format('ddd'),
-    date: moment().format(),
+    //date: 20140502,
+    date: parseInt(moment().format('YYYYMMDD')),
     //fix the names to not be confusing
     //_id: bathroomCodeLiberator.location.id,
     foursquare_venue_id: bathroomCodeLiberator.location.id, 
