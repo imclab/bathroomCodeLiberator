@@ -59,7 +59,7 @@ var loadCode = function () {
     //console.log(resp);
     bathroomCodeLiberator.documents = JSON.parse(resp);
     console.log(bathroomCodeLiberator.documents);
-    
+    $('#suggestedCode').empty();
     $('#suggestedCode').append('<p>The most recent code is: ' + bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code + '<p>');
 
     console.log("The most recent code is: " );
@@ -226,11 +226,15 @@ $('#submitCodeButton').click(function(){
   var request = saveRecord(bathroomCodeData);
 
   request.done(function(resp){
+    $('#suggestedCode').empty();
+    $('#suggestedCode').append('<p>Successful upload</p>');
     console.log("successful upload");
 
   });
 
   request.fail(function(){
+    $('#suggestedCode').empty();
+    $('#suggestedCode').append('<p>Failed upload</p>');
     console.log("failed to upload to cloudant");
   });
 
