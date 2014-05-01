@@ -50,7 +50,7 @@ var saveRecord = function (data) {
 };
 
 var loadCode = function () {
-  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+"/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + "&foursquare_venue_id:" + bathroomCodeLiberator.location.id + '&sort="date"', {
+  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+"/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + " AND foursquare_venue_id:" + bathroomCodeLiberator.location.id + '&sort="date"', {
     beforeSend: function (xhr) {
       xhr.setRequestHeader ("Authorization", "Basic "+hash);
     },
@@ -59,16 +59,19 @@ var loadCode = function () {
     //console.log(resp);
     bathroomCodeLiberator.documents = JSON.parse(resp);
     console.log(bathroomCodeLiberator.documents);
-    $('#suggestedCode').empty();
-    $('#suggestedCode').append('<p>The most recent code is: ' + bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code + '<p>');
+    
+    if (bathroomCodeLiberator.documents.rows.length){
+      $('#suggestedCode').empty();
+      $('#suggestedCode').append('<p>The most recent code is: ' + bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code + '<p>');
+  
+      console.log("The most recent code is: " );
+      console.log(bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code);
+    }
 
-    console.log("The most recent code is: " );
-    console.log(bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code);
-
-    // // Now that the notes are sorted, render them using underscore templates
-    // sorted.forEach(function (row) {
-    //   var compiledTmpl = noteTemplate(row.doc);
-    //   $('#notes').append(compiledTmpl)  
+    else {
+      $('#suggestedCode').empty();
+      $('#suggestedCode').append("There isn't yet a code in the database!");
+    }
   });
 };
 
