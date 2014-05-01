@@ -29,7 +29,51 @@ var foursquareURL='';
 CLIENT_ID = 'K1XIZWQXSX5LIFIC05MXQZURUUEVGPKUHVWD2QW1ZHIOCAEN';
 CLIENT_SECRET = '4MWSP2BBIHHQI4CLL3QVO51KZF24KCALH4GGBJV3ACYN35YT';
 
+var CLOUDANT_USERNAME="arntzy";
+var CLOUDANT_DATABASE="bathroomcodes";
+var CLOUDANT_KEY="lismitspecincestandeastr";
+var CLOUDANT_PASSWORD="1qJD17wuNs0QOSNkfnJa1Iun";
 
+// This function takes your Cloudant key and password and returns a Base64
+// encoded string to authorize your requets. Without this, you'd need to fill
+// in a username and password to make requets. Read more about the btoa()
+// function here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding
+var hash = btoa(CLOUDANT_KEY+":"+CLOUDANT_PASSWORD);
+
+
+var saveRecord = function (data) {
+  return $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE, {
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader ("Authorization", "Basic "+hash); 
+    },
+    contentType: "application/json",
+    type: "POST",
+    data: JSON.stringify(data)
+  });
+};
+
+var loadCode = function () {
+  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+"/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + "&foursquare_venue_id:" + bathroomCodeLiberator.location.id, {
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader ("Authorization", "Basic "+hash);
+    },
+    type: "GET"
+  }).done(function (resp) {
+    //console.log(resp);
+    bathroomCodeLiberator.documents = JSON.parse(resp);
+    console.log(bathroomCodeLiberator.documents);
+    
+    console.log("The possible codes for today are: " );
+    
+    for (var i = 0; i < bathroomCodeLiberator.documents.rows.length; i++) {
+      console.log(bathroomCodeLiberator.documents.rows[i].doc.code);
+    }
+    // // Now that the notes are sorted, render them using underscore templates
+    // sorted.forEach(function (row) {
+    //   var compiledTmpl = noteTemplate(row.doc);
+    //   $('#notes').append(compiledTmpl)  
+  });
+};
 
 
 function getFourSquareVenues() {
@@ -68,8 +112,14 @@ function suggestNearbyLocations (data) {
 });
 
  $('#suggestedLocation').append('<p>Are you at ' + possibleLocations[0].name + '?<p>'); 
- console.log(possibleLocations);
+ 
+ bathroomCodeLiberator.location = possibleLocations[0]; 
+ console.log(bathroomCodeLiberator.location);
+
+ //console.log(possibleLocations);
  // console.log(closestLocations);
+
+
 }
 
 
@@ -132,7 +182,9 @@ function foursquareURLinit(){
 
 function getMyDate(){
 	bathroomCodeLiberator.date = moment().format('YYYYMMDD');
-	console.log(bathroomCodeLiberator.date);
+	bathroomCodeLiberator.day = moment().format('ddd');
+  console.log(bathroomCodeLiberator.day);
+  console.log(bathroomCodeLiberator.date);
 }
 
 
@@ -154,12 +206,36 @@ $('#getLocationButton').click(function(){
 
 $('#getCodeButton').click(function(){
 	console.log("button clicked");
-	// getBathroomCode();
+	loadCode();
+  // getBathroomCode();
 });
 
-
 $('#submitCodeButton').click(function(){
-	submitBathroomCode();
+  console.log("code being submitted");
+
+  var bathroomCodeData = {
+    day: moment().format('ddd'),
+    date: moment().format(),
+    //fix the names to not be confusing
+    //_id: bathroomCodeLiberator.location.id,
+    foursquare_venue_id: bathroomCodeLiberator.location.id, 
+    name: bathroomCodeLiberator.location.name,
+    code: $('#bathroom_code_box').val()
+  };
+
+  console.log(bathroomCodeData);
+
+  var request = saveRecord(bathroomCodeData);
+
+  request.done(function(resp){
+    console.log("successful upload");
+
+  });
+
+  request.fail(function(){
+    console.log("failed to upload to cloudant");
+  });
+
 });
 
 });
