@@ -17,16 +17,18 @@
     <p>This is my Bathroom Code Liberator.</p>
     <div id='loadingDiv'>finding your stupid ass...</div>
     <div id="suggestedLocation"></div>
+    <button id='yesButton' hidden>Yes</button>
+    <button id='noButton' hidden>No</button> 
     <div id="suggestedCode"></div>
     
-    <input type="text" name="locQuery" placeholder='where are you?' disabled>
-    <button id='getLocationButton'>I'm Here</button>
-    <button id='getCodeButton'>Get Code</button>
+    <input id="textbox" type="text" name="locQuery" placeholder='where are you?' disabled>
+    <!-- <button id='getLocationButton'>I'm Here</button> -->
+    
     
 
     
-    <input type="text" name="bathroom_code" id="bathroom_code_box" placeholder="Enter Code:"/>
-    <button id='submitCodeButton'>Submit Code</button>
+    <input type="text" name="bathroom_code" id="bathroom_code_box" placeholder="Submit Code:" hidden/>
+    <!-- <button id='submitCodeButton' hidden>Submit Code</button> -->
 
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>

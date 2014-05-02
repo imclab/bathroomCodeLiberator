@@ -23,8 +23,15 @@
 
 // What are this venue's details?
 // https://api.foursquare.com/v2/venues/VENUE_ID
+
+//add bootstrap
+
+
+
 var bathroomCodeLiberator = {};
 var foursquareURL='';
+var count = 0;
+var tempdata;
 
 CLIENT_ID = 'K1XIZWQXSX5LIFIC05MXQZURUUEVGPKUHVWD2QW1ZHIOCAEN';
 CLIENT_SECRET = '4MWSP2BBIHHQI4CLL3QVO51KZF24KCALH4GGBJV3ACYN35YT';
@@ -37,7 +44,6 @@ var CLOUDANT_PASSWORD="1qJD17wuNs0QOSNkfnJa1Iun";
 
 var hash = btoa(CLOUDANT_KEY+":"+CLOUDANT_PASSWORD);
 
-
 var saveRecord = function (data) {
   return $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE, {
     beforeSend: function (xhr) {
@@ -49,8 +55,9 @@ var saveRecord = function (data) {
   });
 };
 
+
 var loadCode = function () {
-  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+"/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + " AND foursquare_venue_id:" + bathroomCodeLiberator.location.id + '&sort="date"', {
+  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+ "/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + " AND foursquare_venue_id:" + bathroomCodeLiberator.location.id + '&sort="date"', {
     beforeSend: function (xhr) {
       xhr.setRequestHeader ("Authorization", "Basic "+hash);
     },
@@ -62,15 +69,23 @@ var loadCode = function () {
     
     if (bathroomCodeLiberator.documents.rows.length){
       $('#suggestedCode').empty();
-      $('#suggestedCode').append('<p>The most recent code is: ' + bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code + '<p>');
-  
+      $('#suggestedCode').append('<p>The code is: ' + bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code + '<p>');
+      $('#suggestedCode').append("<button id='notrightbutton'>Not Right?</button>");
       console.log("The most recent code is: " );
       console.log(bathroomCodeLiberator.documents.rows[bathroomCodeLiberator.documents.rows.length - 1].doc.code);
+      
+      $('#notrightbutton').click(function(){
+  console.log("clicked");
+  $('#suggestedCode').empty();
+  $('#bathroom_code_box').toggle();
+});
+
     }
 
     else {
       $('#suggestedCode').empty();
       $('#suggestedCode').append("There isn't yet a code in the database!");
+      $('#bathroom_code_box').toggle();
     }
   });
 };
@@ -85,6 +100,7 @@ function getFourSquareVenues() {
 		success: function(data){
 			//console.log("got it");
 			console.log(data);
+      tempdata = data; 
       suggestNearbyLocations(data);
 		},  
 		error: function(err){
@@ -111,15 +127,17 @@ function suggestNearbyLocations (data) {
     return 0;
 });
 
- $('#suggestedLocation').append('<p>Are you at ' + possibleLocations[0].name + '?<p>'); 
+ if(possibleLocations[count]){
+ $('#suggestedLocation').append('<p>Are you at ' + possibleLocations[count].name + '?<p>'); 
  
- bathroomCodeLiberator.location = possibleLocations[0]; 
+ bathroomCodeLiberator.location = possibleLocations[count]; 
  console.log(bathroomCodeLiberator.location);
-
+ $('#yesButton').toggle();
+ $('#noButton').toggle();
+}
+ else $('#suggestedLocation').append("Can't suggest a location!");
  //console.log(possibleLocations);
  // console.log(closestLocations);
-
-
 }
 
 
@@ -193,55 +211,119 @@ $(function(){
 	geoFindMe();
 
 
-$('#getLocationButton').click(function(){
-  console.log($('input').val());
-  var query = $('input').val();
+$('#textbox').keypress(function(e){
+    // e.preventDefault();
+    if(e.keyCode == 13){ 
+     console.log($('input').val());
+     var query = $('input').val();
 
-  foursquareURLinit();
-  foursquareURL += '&query='+ query; 
+     foursquareURLinit();
+     foursquareURL += '&query='+ query; 
   
-  console.log(foursquareURL);
-  getFourSquareVenues();
-});
+    console.log(foursquareURL);
+    getFourSquareVenues(); 
+    }
+  });
 
-$('#getCodeButton').click(function(){
-	console.log("button clicked");
+// $('#getLocationButton').click(function(){
+//   console.log($('input').val());
+//   var query = $('input').val();
+
+//   foursquareURLinit();
+//   foursquareURL += '&query='+ query; 
+  
+//   console.log(foursquareURL);
+//   getFourSquareVenues();
+// });
+
+$('#yesButton').click(function(){
+	//console.log("button clicked");
 	loadCode();
+  $('#yesButton').toggle();
+  $('#noButton').toggle();
   // getBathroomCode();
+  $('#textbox').toggle();
 });
 
-$('#submitCodeButton').click(function(){
+$('#noButton').click(function(){
+   count++; 
+   suggestNearbyLocations(tempdata);
+
+   $('#yesButton').toggle();
+   $('#noButton').toggle();
+});
+
+$('#notrightbutton').click(function(){
+  console.log("clicked");
+  $('#suggestedCode').empty();
+  $('#bathroom_code_box').toggle();
+});
+
+
+$('#bathroom_code_box').keypress(function(e){
+ if(e.keyCode == 13){ 
+
   console.log("code being submitted");
 
   var bathroomCodeData = {
     day: moment().format('ddd'),
-    //date: 20140502,
-    date: parseInt(moment().format('YYYYMMDD')),
-    //fix the names to not be confusing
-    //_id: bathroomCodeLiberator.location.id,
-    foursquare_venue_id: bathroomCodeLiberator.location.id, 
-    name: bathroomCodeLiberator.location.name,
-    code: $('#bathroom_code_box').val()
-  };
+      //date: 20140502,
+      date: parseInt(moment().format('YYYYMMDD')),
+      foursquare_venue_id: bathroomCodeLiberator.location.id, 
+      name: bathroomCodeLiberator.location.name,
+      code: $('#bathroom_code_box').val()
+    };
 
-  console.log(bathroomCodeData);
+    console.log(bathroomCodeData);
 
-  var request = saveRecord(bathroomCodeData);
+    var request = saveRecord(bathroomCodeData);
 
-  request.done(function(resp){
-    $('#suggestedCode').empty();
-    $('#suggestedCode').append('<p>Successful upload</p>');
-    console.log("successful upload");
+    request.done(function(resp){
+      $('#suggestedCode').empty();
+      $('#suggestedCode').append('<p>Successful upload</p>');
+      $('#bathroom_code_box').toggle();
+      $('#textbox').toggle();
+      console.log("successful upload");
+    });
 
-  });
-
-  request.fail(function(){
-    $('#suggestedCode').empty();
-    $('#suggestedCode').append('<p>Failed upload</p>');
-    console.log("failed to upload to cloudant");
-  });
-
+    request.fail(function(){
+      $('#suggestedCode').empty();
+      $('#suggestedCode').append('<p>Failed upload</p>');
+      console.log("failed to upload to cloudant");
+    });
+  }
 });
+
+// $('#submitCodeButton').click(function(){
+//   console.log("code being submitted");
+
+//   var bathroomCodeData = {
+//     day: moment().format('ddd'),
+//     //date: 20140502,
+//     date: parseInt(moment().format('YYYYMMDD')),
+//     foursquare_venue_id: bathroomCodeLiberator.location.id, 
+//     name: bathroomCodeLiberator.location.name,
+//     code: $('#bathroom_code_box').val()
+//   };
+
+//   console.log(bathroomCodeData);
+
+//   var request = saveRecord(bathroomCodeData);
+
+//   request.done(function(resp){
+//     $('#suggestedCode').empty();
+//     $('#suggestedCode').append('<p>Successful upload</p>');
+//     console.log("successful upload");
+
+//   });
+
+//   request.fail(function(){
+//     $('#suggestedCode').empty();
+//     $('#suggestedCode').append('<p>Failed upload</p>');
+//     console.log("failed to upload to cloudant");
+//   });
+
+// });
 
 });
 
