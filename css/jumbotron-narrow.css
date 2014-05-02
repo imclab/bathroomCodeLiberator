@@ -2,6 +2,7 @@
 body {
   padding-top: 20px;
   padding-bottom: 20px;
+  /*background:rgb(200,200,200); */
 }
 
 #textbox {
@@ -56,6 +57,7 @@ body {
 .jumbotron {
   text-align: center;
   border-bottom: 1px solid #e5e5e5;
+  /*background: #D6C1AB;*/
 }
 .jumbotron .btn {
   padding: 14px 24px;

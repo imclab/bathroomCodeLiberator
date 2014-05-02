@@ -112,7 +112,7 @@ function suggestNearbyLocations (data) {
  
  $('#buttonContainer').toggle();
 }
- else $('#suggestedLocation').append("Can't suggest a location!");
+ else $('#suggestedLocation').empty().append("<div id='successMessage' class='alert alert-danger'>I don't think so.</div>");
 }
 
 
@@ -136,7 +136,8 @@ function geoFindMe() {
     console.log("Latitude and longitude found.");
     console.log("Enabling the text field.");
     $('#loadingDiv').hide();
-    $('input').removeAttr("disabled");
+    $('#textboxContainer').toggle();
+    // $('input').removeAttr("disabled");
   }
   
   function error() {
