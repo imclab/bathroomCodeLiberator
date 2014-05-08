@@ -37,7 +37,7 @@ var saveRecord = function (data) {
 
 
 var loadCode = function () {
-  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+ "/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + " AND foursquare_venue_id:" + bathroomCodeLiberator.location.id + '&sort="date"', {
+  $.ajax("https://"+CLOUDANT_USERNAME+".cloudant.com/"+CLOUDANT_DATABASE+ "/_design/search/_search/venue_and_day?include_docs=true&q=day:" + bathroomCodeLiberator.day + " AND foursquare_venue_id:" + bathroomCodeLiberator.location.id + '&sort="moment"', {
     beforeSend: function (xhr) {
       xhr.setRequestHeader ("Authorization", "Basic "+hash);
     },
@@ -166,8 +166,12 @@ function foursquareURLinit(){
 function getMyDate(){
 	bathroomCodeLiberator.date = moment().format('YYYYMMDD');
 	bathroomCodeLiberator.day = moment().format('ddd');
+  bathroomCodeLiberator.time = moment().format('hh:mm:ss');
+  bathroomCodeLiberator.moment = moment().unix();
   console.log(bathroomCodeLiberator.day);
   console.log(bathroomCodeLiberator.date);
+  console.log(bathroomCodeLiberator.time);
+  console.log(bathroomCodeLiberator.moment);
 }
 
 
@@ -213,6 +217,8 @@ $('#bathroom_code_box').keypress(function(e){
   var bathroomCodeData = {
       day: moment().format('ddd'),
       date: parseInt(moment().format('YYYYMMDD')),
+      time: moment().format('hh:mm:ss'),
+      moment: moment().unix(),
       foursquare_venue_id: bathroomCodeLiberator.location.id, 
       name: bathroomCodeLiberator.location.name,
       code: $('#bathroom_code_box').val()
